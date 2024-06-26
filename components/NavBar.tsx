@@ -20,10 +20,16 @@ const navlinks = [
   { name: "Support", href: "/" },
 ];
 
-const NavBar = async () => {
+async function getProfileData() {
   const docRef = db.collection("userProfiles").doc("mainUser");
   const doc = await docRef.get();
-  const profileUrl = UserProfileSchema.parse(doc.data()).imgUrl;
+  const profileData = UserProfileSchema.parse(doc.data());
+  return profileData;
+}
+
+const NavBar = async () => {
+  const profileData = await getProfileData();
+  const profileUrl = profileData.imgUrl;
   return (
     <div className="flex items-center justify-between p-2 border-b border-gray-300 md:px-12 px-5">
       <Link href={"/"}>
@@ -80,3 +86,5 @@ const NavBar = async () => {
 };
 
 export default NavBar;
+
+export const revalidate = 2;
