@@ -1,14 +1,23 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { db } from "@/lib/firebaseAdmin";
 import { UserProfileSchema } from "../../../lib/userProfileSchema";
+
+const COLLECTION_NAME = "userProfiles";
+const DOCUMENT_ID = "mainUser";
 
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), "public", "userdata.json");
-    const fileContents = await fs.readFile(filePath, "utf8");
-    const data = JSON.parse(fileContents);
+    const docRef = db.collection(COLLECTION_NAME).doc(DOCUMENT_ID);
+    const doc = await docRef.get();
 
+    if (!doc.exists) {
+      return NextResponse.json(
+        { error: "User data not found" },
+        { status: 404 }
+      );
+    }
+
+    const data = doc.data();
     const validatedData = UserProfileSchema.parse(data);
 
     return NextResponse.json(validatedData);
@@ -17,7 +26,7 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(
-      { error: "Error reading or validating userdata.json" },
+      { error: "Error reading or validating user data" },
       { status: 500 }
     );
   }
@@ -28,8 +37,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validatedData = UserProfileSchema.parse(body);
 
-    const filePath = path.join(process.cwd(), "public", "userdata.json");
-    await fs.writeFile(filePath, JSON.stringify(validatedData, null, 2));
+    const docRef = db.collection(COLLECTION_NAME).doc(DOCUMENT_ID);
+    await docRef.set(validatedData);
 
     return NextResponse.json(
       { message: "Profile updated successfully" },

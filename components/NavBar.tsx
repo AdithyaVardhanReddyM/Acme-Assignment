@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { Menu } from "lucide-react";
-import { getProfileImage } from "@/lib/getProfileImage";
+import { db } from "@/lib/firebaseAdmin";
+import { UserProfileSchema } from "@/lib/userProfileSchema";
 
 const navlinks = [
   { name: "Home", href: "/" },
@@ -20,7 +21,9 @@ const navlinks = [
 ];
 
 const NavBar = async () => {
-  const profileUrl = await getProfileImage();
+  const docRef = db.collection("userProfiles").doc("mainUser");
+  const doc = await docRef.get();
+  const profileUrl = UserProfileSchema.parse(doc.data()).imgUrl;
   return (
     <div className="flex items-center justify-between p-2 border-b border-gray-300 md:px-12 px-5">
       <Link href={"/"}>
