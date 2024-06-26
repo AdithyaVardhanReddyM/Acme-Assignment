@@ -1,5 +1,6 @@
+"use client";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -8,8 +9,8 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { Menu } from "lucide-react";
-import { db } from "@/lib/firebaseAdmin";
-import { UserProfileSchema } from "@/lib/userProfileSchema";
+import { UserProfile } from "@/lib/userProfileSchema";
+import axios from "axios";
 
 const navlinks = [
   { name: "Home", href: "/" },
@@ -20,16 +21,27 @@ const navlinks = [
   { name: "Support", href: "/" },
 ];
 
-async function getProfileData() {
-  const docRef = db.collection("userProfiles").doc("mainUser");
-  const doc = await docRef.get();
-  const profileData = UserProfileSchema.parse(doc.data());
-  return profileData;
-}
+const NavBar = () => {
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
 
-const NavBar = async () => {
-  const profileData = await getProfileData();
-  const profileUrl = profileData.imgUrl;
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get("/api/profile");
+        const data = response.data;
+        setProfileData(data);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setError("Error fetching profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+  const profileUrl = profileData?.imgUrl;
   return (
     <div className="flex items-center justify-between p-2 border-b border-gray-300 md:px-12 px-5">
       <Link href={"/"}>
@@ -86,5 +98,3 @@ const NavBar = async () => {
 };
 
 export default NavBar;
-
-export const revalidate = 2;
