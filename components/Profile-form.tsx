@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,6 +24,7 @@ import { UploadButton } from "@/utils/uploadthing";
 type Props = {};
 
 const ProfileForm = (props: Props) => {
+  const [uploading, Setuploading] = useState(false);
   const router = useRouter();
   const form = useForm<UserProfile>({
     resolver: zodResolver(UserProfileSchema),
@@ -92,9 +93,11 @@ const ProfileForm = (props: Props) => {
                     <UploadButton
                       endpoint="imageUploader"
                       className="p-2 cursor-pointer"
+                      onUploadBegin={() => Setuploading(true)}
                       onClientUploadComplete={(res) => {
                         field.onChange(res[0].url);
                         console.log("this", field.value);
+                        Setuploading(false);
                       }}
                       onUploadError={(error: Error) => {
                         toast.error(error.message);
@@ -105,6 +108,7 @@ const ProfileForm = (props: Props) => {
                       }}
                     />
                   </FormControl>
+                  {uploading && <Loader2 className="animate-spin" />}
                 </FormItem>
               )}
             />

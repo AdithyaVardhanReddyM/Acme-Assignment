@@ -8,7 +8,7 @@ const page = () => {
       <NavBar />
       <div className="w-full h-full flex items-center justify-center p-5 md:px-20">
         <div className="w-full h-full max-w-5xl">
-          <h1 className="font-bold text-2xl mb-5">Edit profile</h1>
+          <h1 className="font-semibold text-2xl mb-5">Edit profile</h1>
           <ProfileForm />
         </div>
       </div>
